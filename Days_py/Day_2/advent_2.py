@@ -1,39 +1,50 @@
 import pandas as pd
 import sys
 
+def check_safety(line):
+    diffs = [line[i+1] - line[i] for i in range(len(line) - 1)]
+    if (all(x < 0 and x in range(-3,0) for x in diffs) or
+        all(x > 0 and x in range(1,4) for x in diffs)):
+        return True
+    else:
+        return False
+
 def compare_levels(puzzle_input):
-    data_frame = pd.read_csv(puzzle_input, header = None, sep =' ')
-    compare_reports = []
+    data = []
+    with open(puzzle_input) as file:
+        for line in file:
+            entry = [int(x) for x in line.split()]
+            data.append(entry)
     
-    for i in range(data_frame.shape[0]):
-        queue = []
-        for j in range(data_frame.shape[1]):
-            queue.append(data_frame[j][i])
-        
-        compare_reports.append(queue)
+    total = 0
+    for line in data:
+        if check_safety(line):
+            total += 1
     
-    res = 0
-    for report in compare_reports:
-        if report[1] > report[0]:
-            increasing = True
-        elif report[1] < report[0]:
-            increasing = False
+    return total  
+
+def compare_levels_two(puzzle_input):
+    data = []
+    with open(puzzle_input) as file:
+        for line in file:
+            entry = [int(x) for x in line.split()]
+            data.append(entry)
+    
+    total = 0
+    for line in data:
+        if check_safety(line):
+            total += 1
         else:
-            continue
-        
-        prev = None
-        count = 0
-        for num in report:
-            if increasing and ((prev and num > prev and num - prev <= 3) or prev == None) or not increasing and ((prev and num < prev and prev - num <= 3) or prev == None):
-                prev = num
-                count += 1
-            else:
-                break
-        if count == len(compare_reports[0]):
-            res += 1
-            
-    return res
+            for i in range(len(line)):
+                temp = line.copy()
+                temp.pop(i)
+                if check_safety(temp):
+                    total += 1
+                    break
+    
+    return total  
 
 if __name__ == '__main__':
     puzzle_input = sys.argv[1]
     print(compare_levels(puzzle_input))
+    print(compare_levels_two(puzzle_input))
